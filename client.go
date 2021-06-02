@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"strings"
 	"time"
 
 	"github.com/techplexengineer/frc-networktables-go/entry"
@@ -77,42 +78,35 @@ func NewClient(connAddr, connPort string) (*Client, error) {
 	return &client, nil
 }
 
-func (client *Client) connect() {
-	go client.processOutgoingQueue()
-	go client.receiveIncoming()
-	client.startHandshake()
+func (c *Client) connect() {
+	go c.processOutgoingQueue()
+	go c.receiveIncoming()
+	c.startHandshake()
 }
 
-func (client *Client) startHandshake() {
+func (c *Client) startHandshake() {
 	clientName := []byte(IDENTITY)
 	clientLength := util.EncodeULeb128(uint32(len(clientName)))
 	clientName = append(clientLength, clientName...)
 	helloMessage := message.ClientHelloFromItems(VERSION, clientName)
-	client.QueueMessage(helloMessage)
-	client.status = ClientSentHello
+	c.QueueMessage(helloMessage)
+	c.status = ClientSentHello
 }
 
 // Close disconnects and closes the client from the server.
-func (client *Client) Close() error {
-	if client.status == ClientDisconnected {
+func (c *Client) Close() error {
+	if c.status == ClientDisconnected {
 		return errors.New("client: Already disconnected")
 	}
-	client.status = ClientDisconnected
-	client.conn.Close()
+	c.status = ClientDisconnected
+	c.conn.Close()
 	return nil
-}
-
-// GetBoolean fetches a boolean at the specified key
-func (client *Client) GetBoolean(key string) bool {
-	key = util.SanitizeKey(key)
-	_ = key
-	return true
 }
 
 // QueueMessage prepares the message that has been provided for
 // sending.
-func (client *Client) QueueMessage(message message.IMessage) error {
-	if client.status != ClientDisconnected {
+func (c *Client) QueueMessage(message message.IMessage) error {
+	if c.status != ClientDisconnected {
 		fmt.Printf("<=== Sending msg type %#x - %s\n", message.GetType().Byte(), message.GetType().String())
 		messageOutgoingChan <- message
 		return nil
@@ -121,31 +115,31 @@ func (client *Client) QueueMessage(message message.IMessage) error {
 }
 
 // process the queue of outgoing messages, should be called as a gofun
-func (client *Client) processOutgoingQueue() error {
-	for client.status != ClientDisconnected {
+func (c *Client) processOutgoingQueue() error {
+	for c.status != ClientDisconnected {
 		sending := <-messageOutgoingChan
-		client.conn.Write(sending.CompressToBytes())
+		c.conn.Write(sending.CompressToBytes())
 		defer updateLastSent()
 	}
 	return errors.New("client: server could not be reached")
 }
 
 // readMessage
-func (client *Client) receiveIncoming() {
+func (c *Client) receiveIncoming() {
 	var potentialMessage [1]byte
-	for client.status != ClientDisconnected {
-		_, ioError := io.ReadFull(client.conn, potentialMessage[:])
+	for c.status != ClientDisconnected {
+		_, ioError := io.ReadFull(c.conn, potentialMessage[:])
 		if ioError != nil {
 			if ioError == io.EOF {
 				continue
 			}
-			client.Close()
+			c.Close()
 			log.Printf("io error: %s", ioError)
 			return //don't attempt to process any further
 		}
-		tempPacket, messageError := message.BuildFromReader(message.MessageType(potentialMessage[0]), client.conn)
+		tempPacket, messageError := message.BuildFromReader(message.MessageType(potentialMessage[0]), c.conn)
 		if messageError != nil {
-			client.Close()
+			c.Close()
 			log.Printf("Message Error: %s", messageError)
 			return //don't attempt to process any further
 		}
@@ -160,7 +154,7 @@ func (client *Client) receiveIncoming() {
 			fmt.Printf("===> got ServerHelloComplete\n")
 			//@todo send client hello complete
 			msg := message.ClientHelloCompleteFromItems()
-			client.QueueMessage(msg)
+			c.QueueMessage(msg)
 		case message.TypeServerHello:
 			fmt.Printf("===> got ServerHello\n")
 			msg := tempPacket.(*message.ServerHello)
@@ -172,13 +166,13 @@ func (client *Client) receiveIncoming() {
 			fmt.Printf("===> got EntryAssign for %s\n", msg.GetEntry().GetName())
 
 			// map[string]entry.IEntry
-			client.entries[msg.GetEntry().GetName()] = msg.GetEntry()
+			c.entries[msg.GetEntry().GetName()] = msg.GetEntry()
 
 		case message.TypeEntryUpdate:
 			fmt.Printf("===> got EntryUpdate\n")
 			msg := tempPacket.(*message.EntryUpdate)
 			up := msg.GetUpdate()
-			for _, e := range client.entries {
+			for _, e := range c.entries {
 				if up.GetID() == e.GetID() {
 					if up.GetType() != e.GetType() {
 						log.Printf("Types differ. Ignoring update")
@@ -228,12 +222,44 @@ func updateLastSent() {
 // keepAlive should be run in a Go routine. It sends a
 // the provided packet after the provided time (seconds) have
 // passed between the last packet.
-func (client *Client) keepAlive(packet message.IMessage) {
-	for client.status == ClientInSync {
+func (c *Client) keepAlive(packet message.IMessage) {
+	for c.status == ClientInSync {
 		currentTime := time.Now()
 		currentSeconds := currentTime.Unix()
 		if (currentSeconds - lastSent) >= keepAliveTime {
-			go client.QueueMessage(packet)
+			go c.QueueMessage(packet)
 		}
 	}
+}
+
+// GetBoolean fetches a boolean at the specified key
+func (c *Client) GetBoolean(key string) bool {
+	key = util.SanitizeKey(key)
+	_ = key
+	return true
+}
+
+//Set function to be called when robot connects/disconnects
+//func (c Client) AddRobotConnectionListener(callback func()) {}
+//func (c Client) AddKeyListener(key string, callback func()) {}
+
+func (c Client) GetKeys(prefix string) []string {
+	keys := []string{}
+	for k, _ := range c.entries {
+		if prefix != "" && strings.HasPrefix(k, prefix) {
+			keys = append(keys, k)
+		}
+	}
+	return keys
+}
+
+// Determines whether the given key is in this table.
+func (c Client) ContainsKey(key string) bool {
+	_, ok := c.entries[key]
+	return ok
+}
+
+func (c Client) GetEntry(key string) interface{} {
+	e := c.entries[key]
+	return e.GetValue()
 }
