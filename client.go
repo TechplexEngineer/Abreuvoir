@@ -3,15 +3,15 @@ package frcntgo
 import (
 	"errors"
 	"fmt"
-	"github.com/TechplexEngineer/FRC-NetworkTables-Go/entryupdate"
+	"github.com/techplexengineer/frc-networktables-go/entryupdate"
 	"io"
 	"log"
 	"net"
 	"time"
 
-	"github.com/TechplexEngineer/FRC-NetworkTables-Go/entry"
-	"github.com/TechplexEngineer/FRC-NetworkTables-Go/message"
-	"github.com/TechplexEngineer/FRC-NetworkTables-Go/util"
+	"github.com/techplexengineer/frc-networktables-go/entry"
+	"github.com/techplexengineer/frc-networktables-go/message"
+	"github.com/techplexengineer/frc-networktables-go/util"
 )
 
 // ClientStatus is the enum type to represent the different

@@ -2,7 +2,7 @@ package entryupdate
 
 import (
 	"encoding/binary"
-	"github.com/TechplexEngineer/FRC-NetworkTables-Go/entry"
+	"github.com/techplexengineer/frc-networktables-go/entry"
 	"io"
 )
 

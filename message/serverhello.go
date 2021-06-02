@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"io"
 
-	"github.com/TechplexEngineer/FRC-NetworkTables-Go/util"
+	"github.com/techplexengineer/frc-networktables-go/util"
 )
 
 // ServerHello message

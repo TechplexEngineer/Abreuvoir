@@ -3,7 +3,7 @@ package message
 import (
 	"io"
 
-	"github.com/TechplexEngineer/FRC-NetworkTables-Go/entryupdate"
+	"github.com/techplexengineer/frc-networktables-go/entryupdate"
 )
 
 // EntryUpdate message

@@ -2,10 +2,10 @@ package entryupdate
 
 import (
 	"encoding/binary"
-	"github.com/TechplexEngineer/FRC-NetworkTables-Go/entry"
+	"github.com/techplexengineer/frc-networktables-go/entry"
 	"io"
 
-	"github.com/TechplexEngineer/FRC-NetworkTables-Go/util"
+	"github.com/techplexengineer/frc-networktables-go/util"
 )
 
 // DoubleArr Entry

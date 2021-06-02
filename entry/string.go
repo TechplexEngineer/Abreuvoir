@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"io"
 
-	"github.com/TechplexEngineer/FRC-NetworkTables-Go/util"
+	"github.com/techplexengineer/frc-networktables-go/util"
 )
 
 // String Entry

@@ -1,4 +1,4 @@
-module github.com/TechplexEngineer/FRC-NetworkTables-Go
+module github.com/techplexengineer/frc-networktables-go
 
 go 1.16
 
