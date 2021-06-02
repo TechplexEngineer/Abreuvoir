@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"io"
 
-	"github.com/HowardStark/abreuvoir/util"
+	"github.com/TechplexEngineer/FRC-NetworkTables-Go/util"
 )
 
 // Raw entry

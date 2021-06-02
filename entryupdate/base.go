@@ -2,7 +2,7 @@ package entryupdate
 
 import (
 	"errors"
-	"github.com/HowardStark/abreuvoir/entry"
+	"github.com/TechplexEngineer/FRC-NetworkTables-Go/entry"
 	"io"
 )
 

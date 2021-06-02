@@ -1,6 +1,6 @@
 package entryupdate
 
-import "github.com/HowardStark/abreuvoir/entry"
+import "github.com/TechplexEngineer/FRC-NetworkTables-Go/entry"
 
 // IEntryUpdate is the entry update interface
 type IEntryUpdate interface {

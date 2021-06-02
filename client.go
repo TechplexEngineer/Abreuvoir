@@ -3,15 +3,15 @@ package abreuvoir
 import (
 	"errors"
 	"fmt"
-	"github.com/HowardStark/abreuvoir/entryupdate"
+	"github.com/TechplexEngineer/FRC-NetworkTables-Go/entryupdate"
 	"io"
 	"log"
 	"net"
 	"time"
 
-	"github.com/HowardStark/abreuvoir/entry"
-	"github.com/HowardStark/abreuvoir/message"
-	"github.com/HowardStark/abreuvoir/util"
+	"github.com/TechplexEngineer/FRC-NetworkTables-Go/entry"
+	"github.com/TechplexEngineer/FRC-NetworkTables-Go/message"
+	"github.com/TechplexEngineer/FRC-NetworkTables-Go/util"
 )
 
 // ClientStatus is the enum type to represent the different

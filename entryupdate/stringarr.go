@@ -3,10 +3,10 @@ package entryupdate
 import (
 	"bytes"
 	"encoding/binary"
-	"github.com/HowardStark/abreuvoir/entry"
+	"github.com/TechplexEngineer/FRC-NetworkTables-Go/entry"
 	"io"
 
-	"github.com/HowardStark/abreuvoir/util"
+	"github.com/TechplexEngineer/FRC-NetworkTables-Go/util"
 )
 
 // StringArr Entry

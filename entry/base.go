@@ -5,7 +5,7 @@ import (
 	"errors"
 	"io"
 
-	"github.com/HowardStark/abreuvoir/util"
+	"github.com/TechplexEngineer/FRC-NetworkTables-Go/util"
 )
 
 type EntryType byte

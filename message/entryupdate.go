@@ -3,7 +3,7 @@ package message
 import (
 	"io"
 
-	"github.com/HowardStark/abreuvoir/entryupdate"
+	"github.com/TechplexEngineer/FRC-NetworkTables-Go/entryupdate"
 )
 
 // EntryUpdate message
