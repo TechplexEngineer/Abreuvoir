@@ -1,13 +1,12 @@
-package abreuvoir
+package frcntgo
 
 var (
 	address, port string = "0.0.0.0", "1735"
-	client        *Client
 
 	// VERSION is the current NetworkTables protocol revision
 	VERSION = [2]byte{0x03, 0x00}
 	// IDENTITY is the identity of the client or server
-	IDENTITY = "ABREUVOIR"
+	IDENTITY = "GolangNT"
 )
 
 // SetAddress sets the address of the remote server
@@ -28,6 +27,5 @@ func InitClient() (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	client = tempClient
 	return tempClient, nil
 }

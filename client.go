@@ -1,4 +1,4 @@
-package abreuvoir
+package frcntgo
 
 import (
 	"errors"
