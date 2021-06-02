@@ -46,6 +46,6 @@ func (protoUnsupported *ProtoUnsupported) CompressToBytes() []byte {
 }
 
 // GetType returns the message's type
-func (protoUnsupported *ProtoUnsupported) GetType() byte {
+func (protoUnsupported *ProtoUnsupported) GetType() MessageType {
 	return TypeProtoUnsupported
 }

@@ -61,6 +61,6 @@ func (entryFlagUpdate *EntryFlagUpdate) CompressToBytes() []byte {
 }
 
 // GetType returns the message's type
-func (entryFlagUpdate *EntryFlagUpdate) GetType() byte {
+func (entryFlagUpdate *EntryFlagUpdate) GetType() MessageType {
 	return TypeEntryFlagUpdate
 }

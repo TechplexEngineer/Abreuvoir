@@ -2,6 +2,8 @@ package entryupdate
 
 import (
 	"bytes"
+	"encoding/binary"
+	"github.com/HowardStark/abreuvoir/entry"
 	"io"
 
 	"github.com/HowardStark/abreuvoir/util"
@@ -28,7 +30,7 @@ func StringFromReader(id [2]byte, sequence [2]byte, etype byte, reader io.Reader
 		Base: Base{
 			ID:    id,
 			Seq:   sequence,
-			Type:  typeString,
+			Type:  entry.TypeString,
 			Value: value,
 		},
 	}, nil
@@ -43,14 +45,18 @@ func StringFromItems(id [2]byte, sequence [2]byte, etype byte, value []byte) *St
 		Base: Base{
 			ID:    id,
 			Seq:   sequence,
-			Type:  typeString,
+			Type:  entry.TypeString,
 			Value: value,
 		},
 	}
 }
 
 // GetValue returns the value of the String
-func (stringEntry *String) GetValue() interface{} {
+func (stringEntry *String) GetValue() string {
+	return stringEntry.trueValue
+}
+
+func (stringEntry *String) GetValueUnsafe() interface{} {
 	return stringEntry.trueValue
 }
 
@@ -65,4 +71,11 @@ func (stringEntry *String) Clone() *String {
 // CompressToBytes returns a byte slice representing the String entry
 func (stringEntry *String) CompressToBytes() []byte {
 	return stringEntry.Base.compressToBytes()
+}
+
+func (String) GetType() entry.EntryType {
+	return entry.TypeString
+}
+func (o String) GetID() uint16 {
+	return binary.LittleEndian.Uint16(o.ID[:])
 }

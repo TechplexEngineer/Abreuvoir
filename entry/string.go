@@ -2,6 +2,7 @@ package entry
 
 import (
 	"bytes"
+	"encoding/binary"
 	"io"
 
 	"github.com/HowardStark/abreuvoir/util"
@@ -30,7 +31,7 @@ func StringFromReader(name string, id [2]byte, sequence [2]byte, persist byte, r
 		isPersistant: persistant,
 		Base: Base{
 			eName:  name,
-			eType:  typeString,
+			eType:  TypeString,
 			eID:    id,
 			eSeq:   sequence,
 			eFlag:  persist,
@@ -49,7 +50,7 @@ func StringFromItems(name string, id [2]byte, sequence [2]byte, persist byte, va
 		isPersistant: persistant,
 		Base: Base{
 			eName:  name,
-			eType:  typeString,
+			eType:  TypeString,
 			eID:    id,
 			eSeq:   sequence,
 			eFlag:  persist,
@@ -59,25 +60,38 @@ func StringFromItems(name string, id [2]byte, sequence [2]byte, persist byte, va
 }
 
 // GetValue returns the value of the String
-func (stringEntry *String) GetValue() interface{} {
-	return stringEntry.trueValue
+func (o *String) GetValue() interface{} {
+	return o.trueValue
 }
 
 // IsPersistant returns whether or not the entry should persist beyond restarts.
-func (stringEntry *String) IsPersistant() bool {
-	return stringEntry.isPersistant
+func (o *String) IsPersistant() bool {
+	return o.isPersistant
 }
 
 // Clone returns an identical entry
-func (stringEntry *String) Clone() *String {
+func (o *String) Clone() *String {
 	return &String{
-		trueValue:    stringEntry.trueValue,
-		isPersistant: stringEntry.isPersistant,
-		Base:         stringEntry.Base.clone(),
+		trueValue:    o.trueValue,
+		isPersistant: o.isPersistant,
+		Base:         o.Base.clone(),
 	}
 }
 
 // CompressToBytes returns a byte slice representing the String entry
-func (stringEntry *String) CompressToBytes() []byte {
-	return stringEntry.Base.compressToBytes()
+func (o *String) CompressToBytes() []byte {
+	return o.Base.compressToBytes()
+}
+
+func (o String) GetName() string {
+	return o.Base.eName
+}
+func (o String) GetID() uint16 {
+	return binary.LittleEndian.Uint16(o.eID[:])
+}
+func (String) GetType() EntryType {
+	return TypeString
+}
+func (o *String) SetValue(newValue interface{}) {
+
 }

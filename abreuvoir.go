@@ -23,11 +23,11 @@ func SetPort(newPort string) {
 }
 
 // InitClient initializes the client and the connection to the remote server.
-func InitClient() error {
-	var tempClient, err = newClient(address, port)
+func InitClient() (*Client, error) {
+	var tempClient, err = NewClient(address, port)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	client = tempClient
-	return nil
+	return tempClient, nil
 }

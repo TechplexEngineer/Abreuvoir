@@ -2,7 +2,10 @@ package abreuvoir
 
 import (
 	"errors"
+	"fmt"
+	"github.com/HowardStark/abreuvoir/entryupdate"
 	"io"
+	"log"
 	"net"
 	"time"
 
@@ -40,34 +43,34 @@ const (
 )
 
 var (
-	lastPacket          message.Adapter
+	lastPacket          message.IMessage
 	lastSent            int64
-	messageOutgoingChan = make(chan message.Adapter)
+	messageOutgoingChan = make(chan message.IMessage)
 )
 
 // Client is the NetworkTables Client
 type Client struct {
-	handler ClientMessageHandler
+	//handler ClientMessageHandler
 	conn    net.Conn
-	entries map[string]entry.Adapter
+	entries map[string]entry.IEntry
 	status  ClientStatus
 }
 
-func newClient(connAddr, connPort string) (*Client, error) {
+func NewClient(connAddr, connPort string) (*Client, error) {
 	tcpConn, err := net.Dial("tcp", util.ConcatAddress(connAddr, connPort))
 	if err != nil {
 		return &Client{
 			conn:    nil,
-			entries: map[string]entry.Adapter{},
+			entries: map[string]entry.IEntry{},
 			status:  ClientDisconnected,
 		}, err
 	}
 	client := Client{
-		handler: ClientMessageHandler{
-			&client,
-		},
+		//handler: ClientMessageHandler{
+		//	client,
+		//},
 		conn:    tcpConn,
-		entries: map[string]entry.Adapter{},
+		entries: map[string]entry.IEntry{},
 		status:  ClientConnected,
 	}
 	defer client.connect()
@@ -75,9 +78,9 @@ func newClient(connAddr, connPort string) (*Client, error) {
 }
 
 func (client *Client) connect() {
-	go client.sendOutgoing()
+	go client.processOutgoingQueue()
 	go client.receiveIncoming()
-	go client.startHandshake()
+	client.startHandshake()
 }
 
 func (client *Client) startHandshake() {
@@ -108,15 +111,17 @@ func (client *Client) GetBoolean(key string) bool {
 
 // QueueMessage prepares the message that has been provided for
 // sending.
-func (client *Client) QueueMessage(message message.Adapter) error {
+func (client *Client) QueueMessage(message message.IMessage) error {
 	if client.status != ClientDisconnected {
+		fmt.Printf("<=== Sending msg type %#x - %s\n", message.GetType().Byte(), message.GetType().String())
 		messageOutgoingChan <- message
 		return nil
 	}
 	return errors.New("client: server could not be reached")
 }
 
-func (client *Client) sendOutgoing() error {
+// process the queue of outgoing messages, should be called as a gofun
+func (client *Client) processOutgoingQueue() error {
 	for client.status != ClientDisconnected {
 		sending := <-messageOutgoingChan
 		client.conn.Write(sending.CompressToBytes())
@@ -135,10 +140,81 @@ func (client *Client) receiveIncoming() {
 				continue
 			}
 			client.Close()
+			log.Printf("io error: %s", ioError)
+			return //don't attempt to process any further
 		}
-		tempPacket, messageError := message.BuildFromReader(potentialMessage, client.conn)
+		tempPacket, messageError := message.BuildFromReader(message.MessageType(potentialMessage[0]), client.conn)
 		if messageError != nil {
 			client.Close()
+			log.Printf("Message Error: %s", messageError)
+			return //don't attempt to process any further
+		}
+		switch tempPacket.GetType() {
+		case message.TypeKeepAlive:
+			fmt.Printf("===> got KeepAlive\n")
+		case message.TypeClientHello:
+			fmt.Printf("===> got ClientHello\n")
+		case message.TypeProtoUnsupported:
+			fmt.Printf("===> got ProtoUnsupported\n")
+		case message.TypeServerHelloComplete:
+			fmt.Printf("===> got ServerHelloComplete\n")
+			//@todo send client hello complete
+			msg := message.ClientHelloCompleteFromItems()
+			client.QueueMessage(msg)
+		case message.TypeServerHello:
+			fmt.Printf("===> got ServerHello\n")
+			msg := tempPacket.(*message.ServerHello)
+			fmt.Printf("Connected to %s\n", msg.GetServerIdentity())
+		case message.TypeClientHelloComplete:
+			fmt.Printf("===> got ClientHelloComplete\n")
+		case message.TypeEntryAssign:
+			msg := tempPacket.(*message.EntryAssign)
+			fmt.Printf("===> got EntryAssign for %s\n", msg.GetEntry().GetName())
+
+			// map[string]entry.IEntry
+			client.entries[msg.GetEntry().GetName()] = msg.GetEntry()
+
+		case message.TypeEntryUpdate:
+			fmt.Printf("===> got EntryUpdate\n")
+			msg := tempPacket.(*message.EntryUpdate)
+			up := msg.GetUpdate()
+			for _, e := range client.entries {
+				if up.GetID() == e.GetID() {
+					if up.GetType() != e.GetType() {
+						log.Printf("Types differ. Ignoring update")
+						break
+					}
+					switch up.GetType() {
+					case entry.TypeBoolean:
+						eu := up.(*entryupdate.Boolean)
+						e.SetValue(eu.GetValue())
+
+					case entry.TypeDouble:
+					case entry.TypeString:
+					case entry.TypeRaw:
+					case entry.TypeBooleanArr:
+					case entry.TypeDoubleArr:
+					case entry.TypeStringArr:
+					case entry.TypeRPCDef:
+					default:
+						log.Printf("Unknown type! Unable to update entry")
+					}
+					fmt.Printf("%v", e.GetID())
+				}
+			}
+
+		case message.TypeEntryFlagUpdate:
+			fmt.Printf("===> got EntryFlagUpdate\n")
+		case message.TypeEntryDelete:
+			fmt.Printf("===> got EntryDelete\n")
+		case message.TypeClearAllEntries:
+			fmt.Printf("===> got ClearAllEntries\n")
+		case message.TypeRPCExec:
+			fmt.Printf("===> got RPCExec\n")
+		case message.TypeRPCResponse:
+			fmt.Printf("===> got RPCResponse\n")
+		default:
+			fmt.Printf("===> got UNKNOWN\n")
 		}
 		lastPacket = tempPacket
 	}
@@ -152,7 +228,7 @@ func updateLastSent() {
 // keepAlive should be run in a Go routine. It sends a
 // the provided packet after the provided time (seconds) have
 // passed between the last packet.
-func (client *Client) keepAlive(packet message.Adapter) {
+func (client *Client) keepAlive(packet message.IMessage) {
 	for client.status == ClientInSync {
 		currentTime := time.Now()
 		currentSeconds := currentTime.Unix()

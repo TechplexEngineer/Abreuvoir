@@ -33,6 +33,6 @@ func (keepAlive *KeepAlive) CompressToBytes() []byte {
 }
 
 // GetType returns the message's type
-func (keepAlive *KeepAlive) GetType() byte {
+func (keepAlive *KeepAlive) GetType() MessageType {
 	return TypeKeepAlive
 }

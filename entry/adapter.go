@@ -1,7 +1,11 @@
 package entry
 
-// Adapter is the interface for Entries
-type Adapter interface {
+// IEntry is the interface for Entries
+type IEntry interface {
+	GetName() string
 	GetValue() interface{}
+	SetValue(interface{})
 	CompressToBytes() []byte
+	GetID() uint16
+	GetType() EntryType
 }

@@ -2,6 +2,7 @@ package entry
 
 import (
 	"bytes"
+	"encoding/binary"
 	"io"
 
 	"github.com/HowardStark/abreuvoir/util"
@@ -29,7 +30,7 @@ func RawFromReader(name string, id [2]byte, sequence [2]byte, persist byte, read
 		isPersistant: persistant,
 		Base: Base{
 			eName:  name,
-			eType:  typeRaw,
+			eType:  TypeRaw,
 			eID:    id,
 			eSeq:   sequence,
 			eFlag:  persist,
@@ -48,7 +49,7 @@ func RawFromItems(name string, id [2]byte, sequence [2]byte, persist byte, value
 		isPersistant: persistant,
 		Base: Base{
 			eName:  name,
-			eType:  typeRaw,
+			eType:  TypeRaw,
 			eID:    id,
 			eSeq:   sequence,
 			eFlag:  persist,
@@ -58,25 +59,38 @@ func RawFromItems(name string, id [2]byte, sequence [2]byte, persist byte, value
 }
 
 // GetValue returns the raw value of this entry
-func (raw *Raw) GetValue() interface{} {
-	return raw.trueValue
+func (o *Raw) GetValue() interface{} {
+	return o.trueValue
 }
 
 // IsPersistant returns whether or not the entry should persist beyond restarts.
-func (raw *Raw) IsPersistant() bool {
-	return raw.isPersistant
+func (o *Raw) IsPersistant() bool {
+	return o.isPersistant
 }
 
 // Clone returns an identical entry
-func (raw *Raw) Clone() *Raw {
+func (o *Raw) Clone() *Raw {
 	return &Raw{
-		trueValue:    raw.trueValue,
-		isPersistant: raw.isPersistant,
-		Base:         raw.Base.clone(),
+		trueValue:    o.trueValue,
+		isPersistant: o.isPersistant,
+		Base:         o.Base.clone(),
 	}
 }
 
 // CompressToBytes returns a byte slice representing the Raw entry
-func (raw *Raw) CompressToBytes() []byte {
-	return raw.Base.compressToBytes()
+func (o *Raw) CompressToBytes() []byte {
+	return o.Base.compressToBytes()
+}
+
+func (o Raw) GetName() string {
+	return o.Base.eName
+}
+func (o Raw) GetID() uint16 {
+	return binary.LittleEndian.Uint16(o.eID[:])
+}
+func (Raw) GetType() EntryType {
+	return TypeRaw
+}
+func (o *Raw) SetValue(newValue interface{}) {
+
 }

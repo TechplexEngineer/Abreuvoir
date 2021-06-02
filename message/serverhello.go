@@ -75,6 +75,6 @@ func (serverHello *ServerHello) CompressToBytes() []byte {
 }
 
 // GetType returns the message's type
-func (serverHello *ServerHello) GetType() byte {
+func (serverHello *ServerHello) GetType() MessageType {
 	return TypeServerHello
 }

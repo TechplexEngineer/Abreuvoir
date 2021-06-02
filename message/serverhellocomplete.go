@@ -33,6 +33,6 @@ func (serverHelloComplete *ServerHelloComplete) CompressToBytes() []byte {
 }
 
 // GetType returns the message's type
-func (serverHelloComplete *ServerHelloComplete) GetType() byte {
+func (serverHelloComplete *ServerHelloComplete) GetType() MessageType {
 	return TypeServerHelloComplete
 }

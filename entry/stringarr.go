@@ -2,6 +2,7 @@ package entry
 
 import (
 	"bytes"
+	"encoding/binary"
 	"io"
 
 	"github.com/HowardStark/abreuvoir/util"
@@ -42,7 +43,7 @@ func StringArrFromReader(name string, id [2]byte, sequence [2]byte, persist byte
 		isPersistant: persistant,
 		Base: Base{
 			eName:  name,
-			eType:  typeStringArr,
+			eType:  TypeStringArr,
 			eID:    id,
 			eSeq:   sequence,
 			eFlag:  persist,
@@ -70,7 +71,7 @@ func StringArrFromItems(name string, id [2]byte, sequence [2]byte, persist byte,
 		isPersistant: persistant,
 		Base: Base{
 			eName:  name,
-			eType:  typeStringArr,
+			eType:  TypeStringArr,
 			eID:    id,
 			eSeq:   sequence,
 			eFlag:  persist,
@@ -80,30 +81,44 @@ func StringArrFromItems(name string, id [2]byte, sequence [2]byte, persist byte,
 }
 
 // GetValue returns the value of the StringArr
-func (stringArr *StringArr) GetValue() interface{} {
-	return stringArr.trueValue
+func (o *StringArr) GetValue() interface{} {
+	return o.trueValue
 }
 
 // GetValueAtIndex returns the value at the specified index
-func (stringArr *StringArr) GetValueAtIndex(index int) string {
-	return stringArr.trueValue[index]
+func (o *StringArr) GetValueAtIndex(index int) string {
+	return o.trueValue[index]
 }
 
 // IsPersistant returns whether or not the entry should persist beyond restarts.
-func (stringArr *StringArr) IsPersistant() bool {
-	return stringArr.isPersistant
+func (o *StringArr) IsPersistant() bool {
+	return o.isPersistant
 }
 
 // Clone returns an identical entry
-func (stringArr *StringArr) Clone() *StringArr {
+func (o *StringArr) Clone() *StringArr {
 	return &StringArr{
-		trueValue:    stringArr.trueValue,
-		isPersistant: stringArr.isPersistant,
-		Base:         stringArr.Base.clone(),
+		trueValue:    o.trueValue,
+		isPersistant: o.isPersistant,
+		Base:         o.Base.clone(),
 	}
 }
 
 // CompressToBytes returns a byte slice representing the StringArr entry
-func (stringArr *StringArr) CompressToBytes() []byte {
-	return stringArr.Base.compressToBytes()
+func (o *StringArr) CompressToBytes() []byte {
+	return o.Base.compressToBytes()
+}
+
+func (o StringArr) GetName() string {
+	return o.Base.eName
+}
+func (o StringArr) GetID() uint16 {
+	return binary.LittleEndian.Uint16(o.eID[:])
+}
+func (StringArr) GetType() EntryType {
+	return TypeStringArr
+}
+
+func (o *StringArr) SetValue(newValue interface{}) {
+
 }

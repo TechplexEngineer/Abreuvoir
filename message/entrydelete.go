@@ -46,6 +46,6 @@ func (entryDelete *EntryDelete) CompressToBytes() []byte {
 }
 
 // GetType returns the message's type
-func (entryDelete *EntryDelete) GetType() byte {
+func (entryDelete *EntryDelete) GetType() MessageType {
 	return TypeEntryDelete
 }

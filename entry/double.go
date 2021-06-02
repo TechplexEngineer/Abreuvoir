@@ -1,6 +1,7 @@
 package entry
 
 import (
+	"encoding/binary"
 	"io"
 
 	"github.com/HowardStark/abreuvoir/util"
@@ -32,7 +33,7 @@ func DoubleFromItems(name string, id [2]byte, sequence [2]byte, persist byte, va
 		isPersistant: persistant,
 		Base: Base{
 			eName:  name,
-			eType:  typeDouble,
+			eType:  TypeDouble,
 			eID:    id,
 			eSeq:   sequence,
 			eFlag:  persist,
@@ -42,25 +43,39 @@ func DoubleFromItems(name string, id [2]byte, sequence [2]byte, persist byte, va
 }
 
 // GetValue returns the value of the Double
-func (double *Double) GetValue() interface{} {
-	return double.trueValue
+func (o *Double) GetValue() interface{} {
+	return o.trueValue
 }
 
 // IsPersistant returns whether or not the entry should persist beyond restarts.
-func (double *Double) IsPersistant() bool {
-	return double.isPersistant
+func (o *Double) IsPersistant() bool {
+	return o.isPersistant
 }
 
 // Clone returns an identical entry
-func (double *Double) Clone() *Double {
+func (o *Double) Clone() *Double {
 	return &Double{
-		trueValue:    double.trueValue,
-		isPersistant: double.isPersistant,
-		Base:         double.Base.clone(),
+		trueValue:    o.trueValue,
+		isPersistant: o.isPersistant,
+		Base:         o.Base.clone(),
 	}
 }
 
 // CompressToBytes returns a byte slice representing the Double entry
-func (double *Double) CompressToBytes() []byte {
-	return double.Base.compressToBytes()
+func (o *Double) CompressToBytes() []byte {
+	return o.Base.compressToBytes()
+}
+func (o Double) GetName() string {
+	return o.Base.eName
+}
+func (o Double) GetID() uint16 {
+	return binary.LittleEndian.Uint16(o.eID[:])
+}
+
+func (Double) GetType() EntryType {
+	return TypeDouble
+}
+
+func (o *Double) SetValue(newValue interface{}) {
+
 }

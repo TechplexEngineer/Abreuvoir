@@ -1,6 +1,9 @@
 package entry
 
-import "io"
+import (
+	"encoding/binary"
+	"io"
+)
 
 // Boolean Entry
 type Boolean struct {
@@ -28,7 +31,7 @@ func BooleanFromItems(name string, id [2]byte, sequence [2]byte, persist byte, v
 		isPersistant: persistant,
 		Base: Base{
 			eName:  name,
-			eType:  typeBoolean,
+			eType:  TypeBoolean,
 			eID:    id,
 			eSeq:   sequence,
 			eFlag:  persist,
@@ -38,25 +41,41 @@ func BooleanFromItems(name string, id [2]byte, sequence [2]byte, persist byte, v
 }
 
 // GetValue returns the value of the Boolean
-func (boolean *Boolean) GetValue() interface{} {
-	return boolean.trueValue
+func (o *Boolean) GetValue() interface{} {
+	return o.trueValue
 }
 
 // IsPersistant returns whether or not the entry should persist beyond restarts.
-func (boolean *Boolean) IsPersistant() bool {
-	return boolean.isPersistant
+func (o *Boolean) IsPersistant() bool {
+	return o.isPersistant
 }
 
 // Clone returns an identical entry
-func (boolean *Boolean) Clone() *Boolean {
+func (o *Boolean) Clone() *Boolean {
 	return &Boolean{
-		trueValue:    boolean.trueValue,
-		isPersistant: boolean.isPersistant,
-		Base:         boolean.Base.clone(),
+		trueValue:    o.trueValue,
+		isPersistant: o.isPersistant,
+		Base:         o.Base.clone(),
 	}
 }
 
 // CompressToBytes returns a byte slice representing the Boolean entry
-func (boolean *Boolean) CompressToBytes() []byte {
-	return boolean.Base.compressToBytes()
+func (o *Boolean) CompressToBytes() []byte {
+	return o.Base.compressToBytes()
+}
+
+func (o Boolean) GetName() string {
+	return o.Base.eName
+}
+
+func (o Boolean) GetID() uint16 {
+	return binary.LittleEndian.Uint16(o.eID[:])
+}
+
+func (Boolean) GetType() EntryType {
+	return TypeBoolean
+}
+
+func (o *Boolean) SetValue(newValue interface{}) {
+
 }

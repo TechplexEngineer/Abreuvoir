@@ -1,7 +1,7 @@
 package message
 
-// Adapter is the Message interface
-type Adapter interface {
+// IMessage is the Message interface
+type IMessage interface {
 	CompressToBytes() []byte
-	GetType() byte
+	GetType() MessageType
 }

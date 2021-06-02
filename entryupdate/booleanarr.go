@@ -1,6 +1,10 @@
 package entryupdate
 
-import "io"
+import (
+	"encoding/binary"
+	"github.com/HowardStark/abreuvoir/entry"
+	"io"
+)
 
 // BooleanArr Entry
 type BooleanArr struct {
@@ -37,14 +41,18 @@ func BooleanArrFromItems(id [2]byte, sequence [2]byte, etype byte, value []byte)
 		Base: Base{
 			ID:    id,
 			Seq:   sequence,
-			Type:  typeBooleanArr,
+			Type:  entry.TypeBooleanArr,
 			Value: value,
 		},
 	}
 }
 
 // GetValue returns the trueValue
-func (booleanArr *BooleanArr) GetValue() interface{} {
+func (booleanArr *BooleanArr) GetValue() []bool {
+	return booleanArr.trueValue
+}
+
+func (booleanArr *BooleanArr) GetValueUnsafe() interface{} {
 	return booleanArr.trueValue
 }
 
@@ -64,4 +72,11 @@ func (booleanArr *BooleanArr) Clone() *BooleanArr {
 // CompressToBytes returns a byte slice representing the BooleanArr entry
 func (booleanArr *BooleanArr) CompressToBytes() []byte {
 	return booleanArr.Base.compressToBytes()
+}
+
+func (BooleanArr) GetType() entry.EntryType {
+	return entry.TypeDoubleArr
+}
+func (o BooleanArr) GetID() uint16 {
+	return binary.LittleEndian.Uint16(o.ID[:])
 }

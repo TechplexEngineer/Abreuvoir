@@ -1,6 +1,8 @@
 package entryupdate
 
 import (
+	"encoding/binary"
+	"github.com/HowardStark/abreuvoir/entry"
 	"io"
 
 	"github.com/HowardStark/abreuvoir/util"
@@ -30,14 +32,18 @@ func DoubleFromItems(id [2]byte, sequence [2]byte, etype byte, value []byte) *Do
 		Base: Base{
 			ID:    id,
 			Seq:   sequence,
-			Type:  typeDouble,
+			Type:  entry.TypeDouble,
 			Value: value,
 		},
 	}
 }
 
 // GetValue returns the value of the Double
-func (double *Double) GetValue() interface{} {
+func (double *Double) GetValue() float64 {
+	return double.trueValue
+}
+
+func (double *Double) GetValueUnsafe() interface{} {
 	return double.trueValue
 }
 
@@ -52,4 +58,11 @@ func (double *Double) Clone() *Double {
 // CompressToBytes returns a byte slice representing the Double entry
 func (double *Double) CompressToBytes() []byte {
 	return double.Base.compressToBytes()
+}
+
+func (Double) GetType() entry.EntryType {
+	return entry.TypeDouble
+}
+func (o Double) GetID() uint16 {
+	return binary.LittleEndian.Uint16(o.ID[:])
 }

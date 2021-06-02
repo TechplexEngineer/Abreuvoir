@@ -9,7 +9,7 @@ import (
 // EntryAssign message
 type EntryAssign struct {
 	Base
-	entry entry.Adapter
+	entry entry.IEntry
 }
 
 // EntryAssignFromReader builds an EntryAssign message and its entry from a reader
@@ -28,7 +28,7 @@ func EntryAssignFromReader(reader io.Reader) (*EntryAssign, error) {
 }
 
 // EntryAssignFromEntry builds an EntryAssign message from an entry
-func EntryAssignFromEntry(newEntry entry.Adapter) *EntryAssign {
+func EntryAssignFromEntry(newEntry entry.IEntry) *EntryAssign {
 	return &EntryAssign{
 		entry: newEntry,
 		Base: Base{
@@ -54,7 +54,7 @@ func EntryAssignFromBytes(data []byte) (*EntryAssign, error) {
 }
 
 // GetEntry returns the entry associated with this EntryAssign message
-func (entryAssign *EntryAssign) GetEntry() entry.Adapter {
+func (entryAssign *EntryAssign) GetEntry() entry.IEntry {
 	return entryAssign.entry
 }
 
@@ -64,6 +64,6 @@ func (entryAssign *EntryAssign) CompressToBytes() []byte {
 }
 
 // GetType returns the message's type
-func (entryAssign *EntryAssign) GetType() byte {
+func (entryAssign *EntryAssign) GetType() MessageType {
 	return TypeEntryAssign
 }

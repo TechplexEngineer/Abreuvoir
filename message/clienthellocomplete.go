@@ -33,6 +33,6 @@ func (clientHelloComplete *ClientHelloComplete) CompressToBytes() []byte {
 }
 
 // GetType returns the message's type
-func (clientHelloComplete *ClientHelloComplete) GetType() byte {
+func (clientHelloComplete *ClientHelloComplete) GetType() MessageType {
 	return TypeClientHelloComplete
 }

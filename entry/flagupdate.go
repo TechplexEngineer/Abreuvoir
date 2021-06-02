@@ -1,6 +1,9 @@
 package entry
 
-import "io"
+import (
+	"encoding/binary"
+	"io"
+)
 
 // FlagUpdate entry is a partial entry containing only certain fields of an actual entry
 type FlagUpdate struct {
@@ -52,9 +55,16 @@ func FlagUpdateFromItems(dID [2]byte, dFlags byte) *FlagUpdate {
 }
 
 // CompressToBytes returns a byte slice representing the FlagUpdate entry
-func (flagUpdate *FlagUpdate) CompressToBytes() []byte {
+func (o *FlagUpdate) CompressToBytes() []byte {
 	compressed := []byte{}
-	compressed = append(compressed, flagUpdate.ID[:]...)
-	compressed = append(compressed, flagUpdate.flags)
+	compressed = append(compressed, o.ID[:]...)
+	compressed = append(compressed, o.flags)
 	return compressed
+}
+
+//func (o FlagUpdate) GetName() string {
+//	return o.Base.eName
+//}
+func (o FlagUpdate) GetID() uint16 {
+	return binary.LittleEndian.Uint16(o.ID[:])
 }

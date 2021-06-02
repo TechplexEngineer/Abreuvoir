@@ -9,7 +9,7 @@ import (
 // EntryUpdate message
 type EntryUpdate struct {
 	Base
-	Update entryupdate.Adapter
+	Update entryupdate.IEntryUpdate
 }
 
 // EntryUpdateFromReader meme
@@ -28,7 +28,7 @@ func EntryUpdateFromReader(reader io.Reader) (*EntryUpdate, error) {
 }
 
 // EntryUpdateFromUpdate builds an EntryUpdate message from an update
-func EntryUpdateFromUpdate(entryUpdate entryupdate.Adapter) *EntryUpdate {
+func EntryUpdateFromUpdate(entryUpdate entryupdate.IEntryUpdate) *EntryUpdate {
 	return &EntryUpdate{
 		Update: entryUpdate,
 		Base: Base{
@@ -39,7 +39,7 @@ func EntryUpdateFromUpdate(entryUpdate entryupdate.Adapter) *EntryUpdate {
 }
 
 // GetUpdate returns the Update associated with this EntryUpdate
-func (entryUpdate *EntryUpdate) GetUpdate() entryupdate.Adapter {
+func (entryUpdate *EntryUpdate) GetUpdate() entryupdate.IEntryUpdate {
 	return entryUpdate.Update
 }
 
@@ -49,6 +49,6 @@ func (entryUpdate *EntryUpdate) CompressToBytes() []byte {
 }
 
 // GetType returns the message's type
-func (entryUpdate *EntryUpdate) GetType() byte {
+func (entryUpdate *EntryUpdate) GetType() MessageType {
 	return TypeEntryUpdate
 }

@@ -2,18 +2,19 @@ package entryupdate
 
 import (
 	"errors"
+	"github.com/HowardStark/abreuvoir/entry"
 	"io"
 )
 
 const (
-	typeBoolean    byte = 0x00
-	typeDouble     byte = 0x01
-	typeString     byte = 0x02
-	typeRaw        byte = 0x03
-	typeBooleanArr byte = 0x10
-	typeDoubleArr  byte = 0x11
-	typeStringArr  byte = 0x12
-	typeRPCDef     byte = 0x20
+	//typeBoolean    byte = 0x00
+	//typeDouble     byte = 0x01
+	//typeString     byte = 0x02
+	//typeRaw        byte = 0x03
+	//typeBooleanArr byte = 0x10
+	//typeDoubleArr  byte = 0x11
+	//typeStringArr  byte = 0x12
+	//typeRPCDef     byte = 0x20
 
 	flagTemporary byte = 0x00
 	flagPersist   byte = 0x01
@@ -27,12 +28,12 @@ const (
 type Base struct {
 	ID    [2]byte
 	Seq   [2]byte
-	Type  byte
+	Type  entry.EntryType
 	Value []byte
 }
 
 // BuildFromReader sleep
-func BuildFromReader(reader io.Reader) (Adapter, error) {
+func BuildFromReader(reader io.Reader) (IEntryUpdate, error) {
 	var idData [2]byte
 	_, idErr := io.ReadFull(reader, idData[:])
 	if idErr != nil {
@@ -48,20 +49,20 @@ func BuildFromReader(reader io.Reader) (Adapter, error) {
 	if typeErr != nil {
 		return nil, typeErr
 	}
-	switch typeData[0] {
-	case typeBoolean:
+	switch entry.EntryType(typeData[0]) {
+	case entry.TypeBoolean:
 		return BooleanFromReader(idData, seqData, typeData[0], reader)
-	case typeDouble:
+	case entry.TypeDouble:
 		return DoubleFromReader(idData, seqData, typeData[0], reader)
-	case typeString:
+	case entry.TypeString:
 		return StringFromReader(idData, seqData, typeData[0], reader)
-	case typeRaw:
+	case entry.TypeRaw:
 		return RawFromReader(idData, seqData, typeData[0], reader)
-	case typeBooleanArr:
+	case entry.TypeBooleanArr:
 		return BooleanArrFromReader(idData, seqData, typeData[0], reader)
-	case typeDoubleArr:
+	case entry.TypeDoubleArr:
 		return DoubleArrFromReader(idData, seqData, typeData[0], reader)
-	case typeStringArr:
+	case entry.TypeStringArr:
 		return StringArrFromReader(idData, seqData, typeData[0], reader)
 	default:
 		return nil, errors.New("entry: Unknown entry type")
@@ -77,7 +78,7 @@ func (base *Base) compressToBytes() []byte {
 	var compressed []byte
 	compressed = append(compressed, base.ID[:]...)
 	compressed = append(compressed, base.Seq[:]...)
-	compressed = append(compressed, base.Type)
+	compressed = append(compressed, base.Type.Byte())
 	compressed = append(compressed, base.Value...)
 	return compressed
 }

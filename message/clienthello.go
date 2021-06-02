@@ -15,7 +15,7 @@ type ClientHello struct {
 }
 
 // ClientHelloFromReader builds a new ClientHello message using the provided io.Reader
-func ClientHelloFromReader(reader io.Reader) (Adapter, error) {
+func ClientHelloFromReader(reader io.Reader) (IMessage, error) {
 	var protocolRev [2]byte
 	_, err := io.ReadFull(reader, protocolRev[:])
 	if err != nil {
@@ -75,6 +75,6 @@ func (clientHello *ClientHello) CompressToBytes() []byte {
 }
 
 // GetType returns the message's type
-func (clientHello *ClientHello) GetType() byte {
+func (clientHello *ClientHello) GetType() MessageType {
 	return TypeClientHello
 }

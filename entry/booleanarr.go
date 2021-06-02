@@ -1,6 +1,9 @@
 package entry
 
-import "io"
+import (
+	"encoding/binary"
+	"io"
+)
 
 // BooleanArr Entry
 type BooleanArr struct {
@@ -39,7 +42,7 @@ func BooleanArrFromItems(name string, id [2]byte, sequence [2]byte, persist byte
 		isPersistant: persistant,
 		Base: Base{
 			eName:  name,
-			eType:  typeBooleanArr,
+			eType:  TypeBooleanArr,
 			eID:    id,
 			eSeq:   sequence,
 			eFlag:  persist,
@@ -49,30 +52,42 @@ func BooleanArrFromItems(name string, id [2]byte, sequence [2]byte, persist byte
 }
 
 // GetValue returns the trueValue
-func (booleanArr *BooleanArr) GetValue() interface{} {
-	return booleanArr.trueValue
+func (o *BooleanArr) GetValue() interface{} {
+	return o.trueValue
 }
 
 // GetValueAtIndex returns the value at the specified index
-func (booleanArr *BooleanArr) GetValueAtIndex(index int) bool {
-	return booleanArr.trueValue[index]
+func (o *BooleanArr) GetValueAtIndex(index int) bool {
+	return o.trueValue[index]
 }
 
 // IsPersistant returns whether or not the entry should persist beyond restarts.
-func (booleanArr *BooleanArr) IsPersistant() bool {
-	return booleanArr.isPersistant
+func (o *BooleanArr) IsPersistant() bool {
+	return o.isPersistant
 }
 
 // Clone returns an identical entry
-func (booleanArr *BooleanArr) Clone() *BooleanArr {
+func (o *BooleanArr) Clone() *BooleanArr {
 	return &BooleanArr{
-		trueValue:    booleanArr.trueValue,
-		isPersistant: booleanArr.isPersistant,
-		Base:         booleanArr.Base.clone(),
+		trueValue:    o.trueValue,
+		isPersistant: o.isPersistant,
+		Base:         o.Base.clone(),
 	}
 }
 
 // CompressToBytes returns a byte slice representing the BooleanArr entry
-func (booleanArr *BooleanArr) CompressToBytes() []byte {
-	return booleanArr.Base.compressToBytes()
+func (o *BooleanArr) CompressToBytes() []byte {
+	return o.Base.compressToBytes()
+}
+func (o BooleanArr) GetName() string {
+	return o.Base.eName
+}
+func (o BooleanArr) GetID() uint16 {
+	return binary.LittleEndian.Uint16(o.eID[:])
+}
+func (BooleanArr) GetType() EntryType {
+	return TypeBooleanArr
+}
+func (o *BooleanArr) SetValue(newValue interface{}) {
+
 }

@@ -8,15 +8,44 @@ import (
 	"github.com/HowardStark/abreuvoir/util"
 )
 
+type EntryType byte
+
+func (t EntryType) String() string {
+	switch t {
+	case TypeBoolean:
+		return "Boolean"
+	case TypeDouble:
+		return "Double"
+	case TypeString:
+		return "String"
+	case TypeRaw:
+		return "Raw"
+	case TypeBooleanArr:
+		return "BooleanArr"
+	case TypeDoubleArr:
+		return "DoubleArr"
+	case TypeStringArr:
+		return "StringArr"
+	case TypeRPCDef:
+		return "RPCDef"
+	default:
+		return "UNKNOWN ENTRY TYPE"
+	}
+}
+
+func (t EntryType) Byte() byte {
+	return byte(t)
+}
+
 const (
-	typeBoolean    byte = 0x00
-	typeDouble     byte = 0x01
-	typeString     byte = 0x02
-	typeRaw        byte = 0x03
-	typeBooleanArr byte = 0x10
-	typeDoubleArr  byte = 0x11
-	typeStringArr  byte = 0x12
-	typeRPCDef     byte = 0x20
+	TypeBoolean    EntryType = 0x00
+	TypeDouble     EntryType = 0x01
+	TypeString     EntryType = 0x02
+	TypeRaw        EntryType = 0x03
+	TypeBooleanArr EntryType = 0x10
+	TypeDoubleArr  EntryType = 0x11
+	TypeStringArr  EntryType = 0x12
+	TypeRPCDef     EntryType = 0x20
 
 	flagTemporary byte = 0x00
 	flagPersist   byte = 0x01
@@ -34,7 +63,7 @@ var (
 // Base is the base struct for entries.
 type Base struct {
 	eName  string
-	eType  byte
+	eType  EntryType
 	eID    [2]byte
 	eSeq   [2]byte
 	eFlag  byte
@@ -42,7 +71,7 @@ type Base struct {
 }
 
 // BuildFromReader creates an entry using the reader passed in
-func BuildFromReader(reader io.Reader) (Adapter, error) {
+func BuildFromReader(reader io.Reader) (IEntry, error) {
 	nameLen, _ := util.ReadULeb128(reader)
 	nameData := make([]byte, nameLen)
 	_, nameErr := io.ReadFull(reader, nameData[:])
@@ -71,20 +100,20 @@ func BuildFromReader(reader io.Reader) (Adapter, error) {
 		return nil, flagErr
 	}
 	_, _ = nameData, name
-	switch typeData[0] {
-	case typeBoolean:
+	switch EntryType(typeData[0]) {
+	case TypeBoolean:
 		return BooleanFromReader(name, idData, seqData, flagData[0], reader)
-	case typeDouble:
+	case TypeDouble:
 		return DoubleFromReader(name, idData, seqData, flagData[0], reader)
-	case typeString:
+	case TypeString:
 		return StringFromReader(name, idData, seqData, flagData[0], reader)
-	case typeRaw:
+	case TypeRaw:
 		return RawFromReader(name, idData, seqData, flagData[0], reader)
-	case typeBooleanArr:
+	case TypeBooleanArr:
 		return BooleanArrFromReader(name, idData, seqData, flagData[0], reader)
-	case typeDoubleArr:
+	case TypeDoubleArr:
 		return DoubleArrFromReader(name, idData, seqData, flagData[0], reader)
-	case typeStringArr:
+	case TypeStringArr:
 		return StringArrFromReader(name, idData, seqData, flagData[0], reader)
 	default:
 		return nil, errors.New("entry: Unknown entry type")
@@ -92,28 +121,28 @@ func BuildFromReader(reader io.Reader) (Adapter, error) {
 }
 
 // BuildFromBytes creates an entry using the data passed in.
-func BuildFromBytes(data []byte) (Adapter, error) {
+func BuildFromBytes(data []byte) (IEntry, error) {
 	nameLen, sizeLen := util.ReadULeb128(bytes.NewReader(data))
 	dName := string(data[sizeLen : nameLen-1])
-	dType := data[nameLen]
+	dType := EntryType(data[nameLen])
 	dID := [2]byte{data[nameLen+1], data[nameLen+2]}
 	dSeq := [2]byte{data[nameLen+3], data[nameLen+4]}
 	dFlag := data[nameLen+5]
 	dValue := data[nameLen+6:]
 	switch dType {
-	case typeBoolean:
+	case TypeBoolean:
 		return BooleanFromItems(dName, dID, dSeq, dFlag, dValue), nil
-	case typeDouble:
+	case TypeDouble:
 		return DoubleFromItems(dName, dID, dSeq, dFlag, dValue), nil
-	case typeString:
+	case TypeString:
 		return StringFromItems(dName, dID, dSeq, dFlag, dValue), nil
-	case typeRaw:
+	case TypeRaw:
 		return RawFromItems(dName, dID, dSeq, dFlag, dValue), nil
-	case typeBooleanArr:
+	case TypeBooleanArr:
 		return BooleanArrFromItems(dName, dID, dSeq, dFlag, dValue), nil
-	case typeDoubleArr:
+	case TypeDoubleArr:
 		return DoubleArrFromItems(dName, dID, dSeq, dFlag, dValue), nil
-	case typeStringArr:
+	case TypeStringArr:
 		return StringArrFromItems(dName, dID, dSeq, dFlag, dValue), nil
 	default:
 		return nil, errors.New("entry: Unknown entry type")
@@ -131,7 +160,7 @@ func (base *Base) compressToBytes() []byte {
 	nameLen := util.EncodeULeb128(uint32(len(nameBytes)))
 	output = append(output, nameLen...)
 	output = append(output, nameBytes...)
-	output = append(output, base.eType)
+	output = append(output, base.eType.Byte())
 	output = append(output, base.eID[:]...)
 	output = append(output, base.eSeq[:]...)
 	output = append(output, base.eFlag)

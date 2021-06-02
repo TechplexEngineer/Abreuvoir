@@ -2,6 +2,8 @@ package entryupdate
 
 import (
 	"bytes"
+	"encoding/binary"
+	"github.com/HowardStark/abreuvoir/entry"
 	"io"
 
 	"github.com/HowardStark/abreuvoir/util"
@@ -27,7 +29,7 @@ func RawFromReader(id [2]byte, sequence [2]byte, etype byte, reader io.Reader) (
 		Base: Base{
 			ID:    id,
 			Seq:   sequence,
-			Type:  typeRaw,
+			Type:  entry.TypeRaw,
 			Value: value,
 		},
 	}, nil
@@ -42,14 +44,18 @@ func RawFromItems(id [2]byte, sequence [2]byte, etype byte, value []byte) *Raw {
 		Base: Base{
 			ID:    id,
 			Seq:   sequence,
-			Type:  typeRaw,
+			Type:  entry.TypeRaw,
 			Value: value,
 		},
 	}
 }
 
 // GetValue returns the raw value of this entry
-func (raw *Raw) GetValue() interface{} {
+func (raw *Raw) GetValue() []byte {
+	return raw.trueValue
+}
+
+func (raw *Raw) GetValueUnsafe() interface{} {
 	return raw.trueValue
 }
 
@@ -64,4 +70,11 @@ func (raw *Raw) Clone() *Raw {
 // CompressToBytes returns a byte slice representing the Raw entry
 func (raw *Raw) CompressToBytes() []byte {
 	return raw.Base.compressToBytes()
+}
+
+func (Raw) GetType() entry.EntryType {
+	return entry.TypeRaw
+}
+func (o Raw) GetID() uint16 {
+	return binary.LittleEndian.Uint16(o.ID[:])
 }

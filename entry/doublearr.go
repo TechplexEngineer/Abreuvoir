@@ -1,9 +1,9 @@
 package entry
 
 import (
+	"encoding/binary"
 	"io"
-
-	"github.com/HowardStark/abreuvoir/util"
+	//"github.com/HowardStark/abreuvoir/util"
 )
 
 // DoubleArr Entry
@@ -31,19 +31,19 @@ func DoubleArrFromReader(name string, id [2]byte, sequence [2]byte, persist byte
 
 // DoubleArrFromItems builds a DoubleArr entry using the provided parameters
 func DoubleArrFromItems(name string, id [2]byte, sequence [2]byte, persist byte, value []byte) *DoubleArr {
-	valSize := int(value[0])
+	//valSize := int(value[0])
 	var val []float64
-	for counter := 1; (counter-1)/8 < valSize; counter += 8 {
-		tempVal := util.BytesToFloat64(value[counter : counter+8])
-		val = append(val, tempVal)
-	}
+	//for counter := 0; (counter)/8 < valSize; counter += 8 {
+	//	tempVal := util.BytesToFloat64(value[counter : counter+8])
+	//	val = append(val, tempVal)
+	//}
 	persistant := (persist == flagPersist)
 	return &DoubleArr{
 		trueValue:    val,
 		isPersistant: persistant,
 		Base: Base{
 			eName:  name,
-			eType:  typeDoubleArr,
+			eType:  TypeDoubleArr,
 			eID:    id,
 			eSeq:   sequence,
 			eFlag:  persist,
@@ -53,30 +53,43 @@ func DoubleArrFromItems(name string, id [2]byte, sequence [2]byte, persist byte,
 }
 
 // GetValue returns the value of the DoubleArr
-func (doubleArr *DoubleArr) GetValue() interface{} {
-	return doubleArr.trueValue
+func (o *DoubleArr) GetValue() interface{} {
+	return o.trueValue
 }
 
 // GetValueAtIndex returns the value at the specified index
-func (doubleArr *DoubleArr) GetValueAtIndex(index int) float64 {
-	return doubleArr.trueValue[index]
+func (o *DoubleArr) GetValueAtIndex(index int) float64 {
+	return o.trueValue[index]
 }
 
 // IsPersistant returns whether or not the entry should persist beyond restarts.
-func (doubleArr *DoubleArr) IsPersistant() bool {
-	return doubleArr.isPersistant
+func (o *DoubleArr) IsPersistant() bool {
+	return o.isPersistant
 }
 
 // Clone returns an identical entry
-func (doubleArr *DoubleArr) Clone() *DoubleArr {
+func (o *DoubleArr) Clone() *DoubleArr {
 	return &DoubleArr{
-		trueValue:    doubleArr.trueValue,
-		isPersistant: doubleArr.isPersistant,
-		Base:         doubleArr.Base.clone(),
+		trueValue:    o.trueValue,
+		isPersistant: o.isPersistant,
+		Base:         o.Base.clone(),
 	}
 }
 
 // CompressToBytes returns a byte slice representing the DoubleArr entry
-func (doubleArr *DoubleArr) CompressToBytes() []byte {
-	return doubleArr.Base.compressToBytes()
+func (o *DoubleArr) CompressToBytes() []byte {
+	return o.Base.compressToBytes()
+}
+
+func (o DoubleArr) GetName() string {
+	return o.Base.eName
+}
+func (o DoubleArr) GetID() uint16 {
+	return binary.LittleEndian.Uint16(o.eID[:])
+}
+func (DoubleArr) GetType() EntryType {
+	return TypeDoubleArr
+}
+func (o *DoubleArr) SetValue(newValue interface{}) {
+
 }
