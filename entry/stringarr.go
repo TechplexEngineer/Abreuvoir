@@ -12,7 +12,7 @@ import (
 type StringArr struct {
 	Base
 	trueValue    []string
-	isPersistant bool
+	isPersistent bool
 }
 
 // StringArrFromReader builds a StringArr entry using the provided parameters
@@ -37,10 +37,10 @@ func StringArrFromReader(name string, id [2]byte, sequence [2]byte, persist byte
 		value = append(value, strData[:]...)
 		val = append(val, string(strData[:]))
 	}
-	persistant := (persist == flagPersist)
+	persistent := (persist == flagPersist)
 	return &StringArr{
 		trueValue:    val,
-		isPersistant: persistant,
+		isPersistent: persistent,
 		Base: Base{
 			eName:  name,
 			eType:  TypeStringArr,
@@ -65,10 +65,10 @@ func StringArrFromItems(name string, id [2]byte, sequence [2]byte, persist byte,
 		val = append(val, tempVal)
 		previousPos = strPos - 1
 	}
-	persistant := (persist == flagPersist)
+	persistent := (persist == flagPersist)
 	return &StringArr{
 		trueValue:    val,
-		isPersistant: persistant,
+		isPersistent: persistent,
 		Base: Base{
 			eName:  name,
 			eType:  TypeStringArr,
@@ -90,16 +90,16 @@ func (o *StringArr) GetValueAtIndex(index int) string {
 	return o.trueValue[index]
 }
 
-// IsPersistant returns whether or not the entry should persist beyond restarts.
-func (o *StringArr) IsPersistant() bool {
-	return o.isPersistant
+// IsPersistent returns whether or not the entry should persist beyond restarts.
+func (o *StringArr) IsPersistent() bool {
+	return o.isPersistent
 }
 
 // Clone returns an identical entry
 func (o *StringArr) Clone() *StringArr {
 	return &StringArr{
 		trueValue:    o.trueValue,
-		isPersistant: o.isPersistant,
+		isPersistent: o.isPersistent,
 		Base:         o.Base.clone(),
 	}
 }

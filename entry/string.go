@@ -12,7 +12,7 @@ import (
 type String struct {
 	Base
 	trueValue    string
-	isPersistant bool
+	isPersistent bool
 }
 
 // StringFromReader builds a string entry using the provided parameters
@@ -24,11 +24,11 @@ func StringFromReader(name string, id [2]byte, sequence [2]byte, persist byte, r
 		return nil, err
 	}
 	val := string(valData[:])
-	persistant := (persist == flagPersist)
+	persistent := (persist == flagPersist)
 	value := append(sizeData, valData[:]...)
 	return &String{
 		trueValue:    val,
-		isPersistant: persistant,
+		isPersistent: persistent,
 		Base: Base{
 			eName:  name,
 			eType:  TypeString,
@@ -44,10 +44,10 @@ func StringFromReader(name string, id [2]byte, sequence [2]byte, persist byte, r
 func StringFromItems(name string, id [2]byte, sequence [2]byte, persist byte, value []byte) *String {
 	valLen, sizeLen := util.ReadULeb128(bytes.NewReader(value))
 	val := string(value[sizeLen : valLen-1])
-	persistant := (persist == flagPersist)
+	persistent := (persist == flagPersist)
 	return &String{
 		trueValue:    val,
-		isPersistant: persistant,
+		isPersistent: persistent,
 		Base: Base{
 			eName:  name,
 			eType:  TypeString,
@@ -64,16 +64,16 @@ func (o *String) GetValue() interface{} {
 	return o.trueValue
 }
 
-// IsPersistant returns whether or not the entry should persist beyond restarts.
-func (o *String) IsPersistant() bool {
-	return o.isPersistant
+// IsPersistent returns whether or not the entry should persist beyond restarts.
+func (o *String) IsPersistent() bool {
+	return o.isPersistent
 }
 
 // Clone returns an identical entry
 func (o *String) Clone() *String {
 	return &String{
 		trueValue:    o.trueValue,
-		isPersistant: o.isPersistant,
+		isPersistent: o.isPersistent,
 		Base:         o.Base.clone(),
 	}
 }

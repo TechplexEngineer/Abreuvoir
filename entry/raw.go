@@ -12,7 +12,7 @@ import (
 type Raw struct {
 	Base
 	trueValue    []byte
-	isPersistant bool
+	isPersistent bool
 }
 
 // RawFromReader builds a raw entry using the provided parameters
@@ -23,11 +23,11 @@ func RawFromReader(name string, id [2]byte, sequence [2]byte, persist byte, read
 	if err != nil {
 		return nil, err
 	}
-	persistant := (persist == flagPersist)
+	persistent := (persist == flagPersist)
 	value := append(sizeData, valData[:]...)
 	return &Raw{
 		trueValue:    valData[:],
-		isPersistant: persistant,
+		isPersistent: persistent,
 		Base: Base{
 			eName:  name,
 			eType:  TypeRaw,
@@ -43,10 +43,10 @@ func RawFromReader(name string, id [2]byte, sequence [2]byte, persist byte, read
 func RawFromItems(name string, id [2]byte, sequence [2]byte, persist byte, value []byte) *Raw {
 	valLen, sizeLen := util.ReadULeb128(bytes.NewReader(value))
 	val := value[sizeLen : valLen-1]
-	persistant := (persist == flagPersist)
+	persistent := (persist == flagPersist)
 	return &Raw{
 		trueValue:    val,
-		isPersistant: persistant,
+		isPersistent: persistent,
 		Base: Base{
 			eName:  name,
 			eType:  TypeRaw,
@@ -63,16 +63,16 @@ func (o *Raw) GetValue() interface{} {
 	return o.trueValue
 }
 
-// IsPersistant returns whether or not the entry should persist beyond restarts.
-func (o *Raw) IsPersistant() bool {
-	return o.isPersistant
+// IsPersistent returns whether or not the entry should persist beyond restarts.
+func (o *Raw) IsPersistent() bool {
+	return o.isPersistent
 }
 
 // Clone returns an identical entry
 func (o *Raw) Clone() *Raw {
 	return &Raw{
 		trueValue:    o.trueValue,
-		isPersistant: o.isPersistant,
+		isPersistent: o.isPersistent,
 		Base:         o.Base.clone(),
 	}
 }

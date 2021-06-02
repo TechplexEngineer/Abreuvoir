@@ -9,7 +9,7 @@ import (
 type Boolean struct {
 	Base
 	trueValue    bool
-	isPersistant bool
+	isPersistent bool
 }
 
 // BooleanFromReader builds a boolean entry using the provided parameters
@@ -25,10 +25,10 @@ func BooleanFromReader(name string, id [2]byte, sequence [2]byte, persist byte, 
 // BooleanFromItems builds a boolean entry using the provided parameters
 func BooleanFromItems(name string, id [2]byte, sequence [2]byte, persist byte, value []byte) *Boolean {
 	val := (value[0] == boolTrue)
-	persistant := (persist == flagPersist)
+	persistent := (persist == flagPersist)
 	return &Boolean{
 		trueValue:    val,
-		isPersistant: persistant,
+		isPersistent: persistent,
 		Base: Base{
 			eName:  name,
 			eType:  TypeBoolean,
@@ -45,16 +45,16 @@ func (o *Boolean) GetValue() interface{} {
 	return o.trueValue
 }
 
-// IsPersistant returns whether or not the entry should persist beyond restarts.
-func (o *Boolean) IsPersistant() bool {
-	return o.isPersistant
+// IsPersistent returns whether or not the entry should persist beyond restarts.
+func (o *Boolean) IsPersistent() bool {
+	return o.isPersistent
 }
 
 // Clone returns an identical entry
 func (o *Boolean) Clone() *Boolean {
 	return &Boolean{
 		trueValue:    o.trueValue,
-		isPersistant: o.isPersistant,
+		isPersistent: o.isPersistent,
 		Base:         o.Base.clone(),
 	}
 }

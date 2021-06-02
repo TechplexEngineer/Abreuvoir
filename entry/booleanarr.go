@@ -9,7 +9,7 @@ import (
 type BooleanArr struct {
 	Base
 	trueValue    []bool
-	isPersistant bool
+	isPersistent bool
 }
 
 // BooleanArrFromReader builds a BooleanArr entry using the provided parameters
@@ -39,7 +39,7 @@ func BooleanArrFromItems(name string, id [2]byte, sequence [2]byte, persist byte
 	persistant := (persist == flagPersist)
 	return &BooleanArr{
 		trueValue:    val,
-		isPersistant: persistant,
+		isPersistent: persistant,
 		Base: Base{
 			eName:  name,
 			eType:  TypeBooleanArr,
@@ -61,16 +61,16 @@ func (o *BooleanArr) GetValueAtIndex(index int) bool {
 	return o.trueValue[index]
 }
 
-// IsPersistant returns whether or not the entry should persist beyond restarts.
-func (o *BooleanArr) IsPersistant() bool {
-	return o.isPersistant
+// IsPersistent returns whether or not the entry should persist beyond restarts.
+func (o *BooleanArr) IsPersistent() bool {
+	return o.isPersistent
 }
 
 // Clone returns an identical entry
 func (o *BooleanArr) Clone() *BooleanArr {
 	return &BooleanArr{
 		trueValue:    o.trueValue,
-		isPersistant: o.isPersistant,
+		isPersistent: o.isPersistent,
 		Base:         o.Base.clone(),
 	}
 }

@@ -8,7 +8,7 @@ import (
 // FlagUpdate entry is a partial entry containing only certain fields of an actual entry
 type FlagUpdate struct {
 	ID           [2]byte
-	IsPersistant bool
+	IsPersistent bool
 	flags        byte
 }
 
@@ -27,7 +27,7 @@ func FlagUpdateFromReader(reader io.Reader) (*FlagUpdate, error) {
 	dPersist := (dFlags[0] == flagPersist)
 	return &FlagUpdate{
 		ID:           dID,
-		IsPersistant: dPersist,
+		IsPersistent: dPersist,
 		flags:        dFlags[0],
 	}, nil
 }
@@ -39,7 +39,7 @@ func FlagUpdateFromBytes(data []byte) *FlagUpdate {
 	dPersist := (dFlags == flagPersist)
 	return &FlagUpdate{
 		ID:           dID,
-		IsPersistant: dPersist,
+		IsPersistent: dPersist,
 		flags:        dFlags,
 	}
 }
@@ -49,7 +49,7 @@ func FlagUpdateFromItems(dID [2]byte, dFlags byte) *FlagUpdate {
 	dPersist := (dFlags == flagPersist)
 	return &FlagUpdate{
 		ID:           dID,
-		IsPersistant: dPersist,
+		IsPersistent: dPersist,
 		flags:        dFlags,
 	}
 }

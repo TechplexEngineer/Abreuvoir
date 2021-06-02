@@ -11,7 +11,7 @@ import (
 type Double struct {
 	Base
 	trueValue    float64
-	isPersistant bool
+	isPersistent bool
 }
 
 // DoubleFromReader builds a double entry using the provided parameters
@@ -27,10 +27,10 @@ func DoubleFromReader(name string, id [2]byte, sequence [2]byte, persist byte, r
 // DoubleFromItems builds a double entry using the provided parameters
 func DoubleFromItems(name string, id [2]byte, sequence [2]byte, persist byte, value []byte) *Double {
 	val := util.BytesToFloat64(value[:8])
-	persistant := (persist == flagPersist)
+	persistent := (persist == flagPersist)
 	return &Double{
 		trueValue:    val,
-		isPersistant: persistant,
+		isPersistent: persistent,
 		Base: Base{
 			eName:  name,
 			eType:  TypeDouble,
@@ -47,16 +47,16 @@ func (o *Double) GetValue() interface{} {
 	return o.trueValue
 }
 
-// IsPersistant returns whether or not the entry should persist beyond restarts.
-func (o *Double) IsPersistant() bool {
-	return o.isPersistant
+// IsPersistent returns whether or not the entry should persist beyond restarts.
+func (o *Double) IsPersistent() bool {
+	return o.isPersistent
 }
 
 // Clone returns an identical entry
 func (o *Double) Clone() *Double {
 	return &Double{
 		trueValue:    o.trueValue,
-		isPersistant: o.isPersistant,
+		isPersistent: o.isPersistent,
 		Base:         o.Base.clone(),
 	}
 }

@@ -10,7 +10,7 @@ import (
 type DoubleArr struct {
 	Base
 	trueValue    []float64
-	isPersistant bool
+	isPersistent bool
 }
 
 // DoubleArrFromReader builds a DoubleArr entry using the provided parameters
@@ -40,7 +40,7 @@ func DoubleArrFromItems(name string, id [2]byte, sequence [2]byte, persist byte,
 	persistant := (persist == flagPersist)
 	return &DoubleArr{
 		trueValue:    val,
-		isPersistant: persistant,
+		isPersistent: persistant,
 		Base: Base{
 			eName:  name,
 			eType:  TypeDoubleArr,
@@ -64,14 +64,14 @@ func (o *DoubleArr) GetValueAtIndex(index int) float64 {
 
 // IsPersistant returns whether or not the entry should persist beyond restarts.
 func (o *DoubleArr) IsPersistant() bool {
-	return o.isPersistant
+	return o.isPersistent
 }
 
 // Clone returns an identical entry
 func (o *DoubleArr) Clone() *DoubleArr {
 	return &DoubleArr{
 		trueValue:    o.trueValue,
-		isPersistant: o.isPersistant,
+		isPersistent: o.isPersistent,
 		Base:         o.Base.clone(),
 	}
 }
