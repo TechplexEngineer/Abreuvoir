@@ -44,7 +44,6 @@ const (
 )
 
 var (
-	lastPacket          message.IMessage
 	lastSent            int64
 	messageOutgoingChan = make(chan message.IMessage)
 )
@@ -57,6 +56,23 @@ type Client struct {
 	status  ClientStatus
 }
 
+// Create a new network tables client connecting to a server on localhost
+func NewClientLocalhost() (*Client, error) {
+	address = "0.0.0.0"
+	port = "1735"
+	return NewClient(address, port)
+}
+
+// Create a new network tables client using mdns given a team number
+func NewClientTeam(teamNumber int) (*Client, error) {
+	address = fmt.Sprintf("roboRIO-%d-FRC.local", teamNumber) //no leading zeros
+	port = "1735"
+	return NewClient(address, port)
+}
+
+// Create a new Network Tables client
+// connAddr can be an IP or hostname
+// connPort is the tcp port to connect to. Usually Network Tables uses port 1735
 func NewClient(connAddr, connPort string) (*Client, error) {
 	tcpConn, err := net.Dial("tcp", util.ConcatAddress(connAddr, connPort))
 	if err != nil {
@@ -67,9 +83,6 @@ func NewClient(connAddr, connPort string) (*Client, error) {
 		}, err
 	}
 	client := Client{
-		//handler: ClientMessageHandler{
-		//	client,
-		//},
 		conn:    tcpConn,
 		entries: map[string]entry.IEntry{},
 		status:  ClientConnected,
@@ -115,13 +128,13 @@ func (c *Client) QueueMessage(message message.IMessage) error {
 }
 
 // process the queue of outgoing messages, should be called as a gofun
-func (c *Client) processOutgoingQueue() error {
+func (c *Client) processOutgoingQueue() {
 	for c.status != ClientDisconnected {
 		sending := <-messageOutgoingChan
 		c.conn.Write(sending.CompressToBytes())
-		defer updateLastSent()
+		defer updateLastSent() //@todo why is this deferred?
 	}
-	return errors.New("client: server could not be reached")
+	log.Printf("client: server could not be reached")
 }
 
 // readMessage
@@ -210,7 +223,6 @@ func (c *Client) receiveIncoming() {
 		default:
 			fmt.Printf("===> got UNKNOWN\n")
 		}
-		lastPacket = tempPacket
 	}
 }
 
