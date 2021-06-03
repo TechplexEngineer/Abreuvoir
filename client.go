@@ -267,3 +267,23 @@ func (c Client) GetEntry(key string) interface{} {
 	e := c.entries[key]
 	return e.GetValue()
 }
+
+type SnapShotEntry struct {
+	Key      string `json:"key"`
+	Value    string `json:"value"`
+	Datatype string `json:"type"`
+}
+
+func (c Client) GetSnapshot(prefix string) []SnapShotEntry {
+	keys := []SnapShotEntry{}
+	for k, v := range c.entries {
+		if prefix == "" || strings.HasPrefix(k, prefix) {
+			keys = append(keys, SnapShotEntry{
+				Key:      k,
+				Value:    fmt.Sprintf("%#v", v.GetValue()),
+				Datatype: v.GetType().String(),
+			})
+		}
+	}
+	return keys
+}
