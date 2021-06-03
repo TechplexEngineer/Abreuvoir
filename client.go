@@ -233,10 +233,14 @@ func (c *Client) keepAlive(packet message.IMessage) {
 }
 
 // GetBoolean fetches a boolean at the specified key
-func (c *Client) GetBoolean(key string) bool {
+func (c *Client) GetBoolean(key string) (bool, error) {
 	key = util.SanitizeKey(key)
-	_ = key
-	return true
+	entry, ok := c.entries[key]
+	if !ok {
+		return false, fmt.Errorf("key is missing")
+	}
+
+	return entry.GetValue().(bool), nil
 }
 
 //Set function to be called when robot connects/disconnects
@@ -246,7 +250,7 @@ func (c *Client) GetBoolean(key string) bool {
 func (c Client) GetKeys(prefix string) []string {
 	keys := []string{}
 	for k, _ := range c.entries {
-		if prefix != "" && strings.HasPrefix(k, prefix) {
+		if prefix == "" || strings.HasPrefix(k, prefix) {
 			keys = append(keys, k)
 		}
 	}
