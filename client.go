@@ -1,6 +1,7 @@
 package frcntgo
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/techplexengineer/frc-networktables-go/entryupdate"
@@ -58,15 +59,15 @@ type Client struct {
 
 // Create a new network tables client connecting to a server on localhost
 func NewClientLocalhost() (*Client, error) {
-	address = "0.0.0.0"
-	port = "1735"
+	address := "0.0.0.0"
+	port := "1735"
 	return NewClient(address, port)
 }
 
 // Create a new network tables client using mdns given a team number
 func NewClientTeam(teamNumber int) (*Client, error) {
-	address = fmt.Sprintf("roboRIO-%d-FRC.local", teamNumber) //no leading zeros
-	port = "1735"
+	address := fmt.Sprintf("roboRIO-%d-FRC.local", teamNumber) //no leading zeros
+	port := "1735"
 	return NewClient(address, port)
 }
 
@@ -98,9 +99,10 @@ func (c *Client) connect() {
 }
 
 func (c *Client) startHandshake() {
-	clientName := []byte(IDENTITY)
+	clientName := []byte("frc-nt-golang")
 	clientLength := util.EncodeULeb128(uint32(len(clientName)))
 	clientName = append(clientLength, clientName...)
+	VERSION := [2]byte{0x03, 0x00}
 	helloMessage := message.ClientHelloFromItems(VERSION, clientName)
 	c.QueueMessage(helloMessage)
 	c.status = ClientSentHello
@@ -290,9 +292,15 @@ func (c Client) GetSnapshot(prefix string) []SnapShotEntry {
 	keys := []SnapShotEntry{}
 	for k, v := range c.entries {
 		if prefix == "" || strings.HasPrefix(k, prefix) {
+			valueStr := fmt.Sprintf("%#v", v.GetValue())
+			valueByt, err := json.Marshal(v.GetValue())
+			if err == nil {
+				valueStr = string(valueByt)
+			}
+
 			keys = append(keys, SnapShotEntry{
 				Key:      k,
-				Value:    fmt.Sprintf("%#v", v.GetValue()),
+				Value:    valueStr,
 				Datatype: v.GetType().String(),
 			})
 		}
