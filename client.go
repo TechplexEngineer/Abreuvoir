@@ -57,6 +57,10 @@ type Client struct {
 	status  ClientStatus
 }
 
+func (c *Client) GetStatus() ClientStatus {
+	return c.status
+}
+
 // Create a new network tables client connecting to a server on localhost
 func NewClientLocalhost() (*Client, error) {
 	address := "0.0.0.0"
@@ -103,6 +107,8 @@ func (c *Client) startHandshake() {
 	clientLength := util.EncodeULeb128(uint32(len(clientName)))
 	clientName = append(clientLength, clientName...)
 	VERSION := [2]byte{0x03, 0x00}
+
+	// Step 1: Client sends Client Hello
 	helloMessage := message.ClientHelloFromItems(VERSION, clientName)
 	c.QueueMessage(helloMessage)
 	c.status = ClientSentHello
@@ -158,33 +164,35 @@ func (c *Client) receiveIncoming() {
 			log.Printf("Message Error: %s", messageError)
 			return //don't attempt to process any further
 		}
+		fmt.Printf("===> got %s\n", tempPacket.GetType())
 		switch tempPacket.GetType() {
-		case message.TypeKeepAlive:
-			fmt.Printf("===> got KeepAlive\n")
-		case message.TypeClientHello:
-			fmt.Printf("===> got ClientHello\n")
-		case message.TypeProtoUnsupported:
-			fmt.Printf("===> got ProtoUnsupported\n")
-		case message.TypeServerHelloComplete:
-			fmt.Printf("===> got ServerHelloComplete\n")
-			//@todo send client hello complete
-			msg := message.ClientHelloCompleteFromItems()
-			c.QueueMessage(msg)
+
 		case message.TypeServerHello:
-			fmt.Printf("===> got ServerHello\n")
+			// Step 2: Server replies to ClientHello with ServerHello
 			msg := tempPacket.(*message.ServerHello)
 			fmt.Printf("Connected to %s\n", msg.GetServerIdentity())
-		case message.TypeClientHelloComplete:
-			fmt.Printf("===> got ClientHelloComplete\n")
+
 		case message.TypeEntryAssign:
+			// Step 3: Server sends EntryAssign messages for each entry
+			// if we just sent a client hello then the sync is beginning
+			if c.status == ClientSentHello {
+				c.status = ClientStartingSync
+			}
 			msg := tempPacket.(*message.EntryAssign)
-			fmt.Printf("===> got EntryAssign for %s\n", msg.GetEntry().GetName())
-
-			// map[string]entry.IEntry
 			c.entries[msg.GetEntry().GetName()] = msg.GetEntry()
+		case message.TypeServerHelloComplete:
+			// Step 4: The Server sends a Server Hello Complete message.
+			// Server is done sending entryAssigns
 
+			// Step 5: For all Entries the Client recognizes that the Server
+			// did not identify with a Entry Assignment.
+			// we can now send any entries the server should have @todo not implemented
+
+			// Step 6: The Client sends a Client Hello Complete message.
+			msg := message.ClientHelloCompleteFromItems()
+			c.QueueMessage(msg)
+			c.status = ClientInSync
 		case message.TypeEntryUpdate:
-			fmt.Printf("===> got EntryUpdate\n")
 			msg := tempPacket.(*message.EntryUpdate)
 			up := msg.GetUpdate()
 			for _, e := range c.entries {
@@ -211,17 +219,24 @@ func (c *Client) receiveIncoming() {
 					fmt.Printf("%v", e.GetID())
 				}
 			}
-
+		case message.TypeClientHelloComplete:
+			// only expect to get this message on the server
+		case message.TypeKeepAlive:
+			// can be safely ignored
+		case message.TypeClientHello:
+			// only expected on the server
+		case message.TypeProtoUnsupported:
+			// @todo
 		case message.TypeEntryFlagUpdate:
-			fmt.Printf("===> got EntryFlagUpdate\n")
+			// @todo
 		case message.TypeEntryDelete:
-			fmt.Printf("===> got EntryDelete\n")
+			// @todo
 		case message.TypeClearAllEntries:
-			fmt.Printf("===> got ClearAllEntries\n")
+			// @todo
 		case message.TypeRPCExec:
-			fmt.Printf("===> got RPCExec\n")
+			// @todo
 		case message.TypeRPCResponse:
-			fmt.Printf("===> got RPCResponse\n")
+			// @todo
 		default:
 			fmt.Printf("===> got UNKNOWN\n")
 		}

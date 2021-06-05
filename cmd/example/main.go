@@ -13,7 +13,13 @@ func main() {
 		panic(err)
 	}
 
-	time.Sleep(5 * time.Second) //@todo really need to wait for the client to enter the sync state
+	fmt.Printf("Waiting for initial sync...\n")
+	for client.GetStatus() != frcntgo.ClientInSync {
+		time.Sleep(500 * time.Millisecond)
+	}
+	fmt.Printf("Initial sync complete.\n")
+
+	//time.Sleep(5 * time.Second) //@todo really need to wait for the client to enter the sync state
 
 	isRed, err := client.GetBoolean("/bool")
 	if err != nil {
