@@ -1,3 +1,14 @@
+# Archived
+See: https://github.com/TechplexEngineer/goNTCore for a more complete implementaion
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
 # FRC-NetworkTables-Go
 A Golang implementation of a subset of the FRC Network Tables protocol.
 
